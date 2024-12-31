@@ -35,7 +35,8 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const AdsHomeDatabase = client.db("AdsHome");
+    const adsHomeDatabase = client.db("adsHome");
+    const usersCollection = adsHomeDatabase.collection("users");
 
     // JWT
     app.post("/jwt", async (req, res) => {
@@ -46,6 +47,23 @@ async function run() {
       res.send({ token });
     });
 
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      console.log(user);
+
+      const query = { email: user.email };
+      const existingUser = await usersCollection.findOne(query);
+      console.log(existingUser);
+      if (existingUser) {
+        return res.send({
+          message: "user already exists",
+          insertedId: null,
+        });
+      }
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -53,7 +71,7 @@ async function run() {
     );
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 
