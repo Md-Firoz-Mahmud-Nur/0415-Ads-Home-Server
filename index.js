@@ -34,6 +34,18 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    const AdsHomeDatabase = client.db("AdsHome");
+
+    // JWT
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+      res.send({ token });
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -46,7 +58,6 @@ async function run() {
 }
 
 run().catch(console.dir);
-
 
 app.get("/", (req, res) => {
   res.send("0415-Ads-Home-Server is running");
